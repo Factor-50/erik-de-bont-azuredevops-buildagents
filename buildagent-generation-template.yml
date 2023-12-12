@@ -73,25 +73,25 @@ stages:
 
                 $runner_images_version = '${{ parameters.runner_images_version }}'
                 Write-Output "runner images version = $runner_images_version"
-                if ($runner_images_version -ne 'alpha') {
-                  $os_image_type = '${{ parameters.image_type }}'
-                  Write-Output "os image type = $os_image_type"
-                  switch ($os_image_type) {
-                    'windows2019' { $OSTagPrefix = 'win19' }
-                    'windows2022' { $OSTagPrefix = 'win22' }
-                    'ubuntu2004' { $OSTagPrefix = 'ubuntu20' }
-                    'ubuntu2204' { $OSTagPrefix = 'ubuntu22' }
-                  }
-                  Write-Output "OSTagPrefix = $OSTagPrefix"
+                # if ($runner_images_version -ne 'alpha') {
+                #   $os_image_type = '${{ parameters.image_type }}'
+                #   Write-Output "os image type = $os_image_type"
+                #   switch ($os_image_type) {
+                #     'windows2019' { $OSTagPrefix = 'win19' }
+                #     'windows2022' { $OSTagPrefix = 'win22' }
+                #     'ubuntu2004' { $OSTagPrefix = 'ubuntu20' }
+                #     'ubuntu2204' { $OSTagPrefix = 'ubuntu22' }
+                #   }
+                #   Write-Output "OSTagPrefix = $OSTagPrefix"
 
-                  $IncludePrerelease = if ($runner_images_version -eq 'prerelease') { $true } else { $false }
-                  Write-Output "IncludePrerelease = $IncludePrerelease"
+                #   $IncludePrerelease = if ($runner_images_version -eq 'prerelease') { $true } else { $false }
+                #   Write-Output "IncludePrerelease = $IncludePrerelease"
 
-                  $latest_release = ${{ parameters.repository_base_path }}/scripts/get-latestgithubrelease.ps1 -OSTagPrefix $OSTagPrefix -GitHubOwner $GitHubOwner -RepoName $RepoName -IncludePrerelease $IncludePrerelease
-                  write-output $latest_release
-                  cd runner-images
-                  git checkout ($latest_release.tag_name)
-                }
+                #   $latest_release = ${{ parameters.repository_base_path }}/scripts/get-latestgithubrelease.ps1 -OSTagPrefix $OSTagPrefix -GitHubOwner $GitHubOwner -RepoName $RepoName -IncludePrerelease $IncludePrerelease
+                #   write-output $latest_release
+                #   cd runner-images
+                #   git checkout ($latest_release.tag_name)
+                # }
 
           - task: PowerShell@2
             name: setVars
@@ -153,7 +153,7 @@ stages:
               script: |
                 If ('$(setVars.OsType)' -eq 'Windows') {
                   Write-Host 'Attempting to modify $(TemplatePath) with workaround'
-                  ((Get-Content -path "$(TemplatePath)" -Raw) -replace '"type": "azure-arm",','"type": "azure-arm","azure_tags": { "ExcludeMdeAutoProvisioning": "True" },') | Set-Content -Path "$(TemplatePath)"              
+                  ((Get-Content -path "$(TemplatePath)" -Raw) -replace '"type": "azure-arm",','"type": "azure-arm","azure_tags": { "ExcludeMdeAutoProvisioning": "True" },') | Set-Content -Path "$(TemplatePath)"
                   Write-Host "##[section] Template $(TemplatePath) modified"
                 } else {
                   Write-Host "##[section] Patch not applied as $(TemplatePath) is not a Windows template"
