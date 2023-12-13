@@ -36,7 +36,7 @@ jobs:
         inputs:
           script: |
             echo "Structure of work folder of this pipeline:"
-            tree $(Agent.WorkFolder)/1
+            tree $(Agent.WorkFolder)
 
             echo "Build.ArtifactStagingDirectory:"
             echo "$(Build.ArtifactStagingDirectory)"
