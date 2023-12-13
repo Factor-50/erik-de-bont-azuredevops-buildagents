@@ -32,21 +32,6 @@ jobs:
       - ${{ if ne(parameters.repository_base_path, '.') }}:
           - checkout: ${{ parameters.repository_base_path }}
 
-      - task: CmdLine@2
-        inputs:
-          script: |
-            echo "Structure of work folder of this pipeline:"
-            tree $(Agent.WorkFolder)
-
-            echo "Build.ArtifactStagingDirectory:"
-            echo "$(Build.ArtifactStagingDirectory)"
-
-            echo "Build.BinariesDirectory:"
-            echo "$(Build.BinariesDirectory)"
-
-            echo "Build.SourcesDirectory:"
-            echo "$(Build.SourcesDirectory)"
-
       - task: PowerShell@2
         displayName: "Create new Gallery Virtual Machine Image version"
         name: creategalleryimageversion
