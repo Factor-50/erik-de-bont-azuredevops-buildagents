@@ -74,15 +74,17 @@ stages:
                 $runner_images_version = '${{ parameters.runner_images_version }}'
                 Write-Output "runner images version = $runner_images_version"
                 # if ($runner_images_version -ne 'alpha') {
-                #   $os_image_type = '${{ parameters.image_type }}'
-                #   Write-Output "os image type = $os_image_type"
-                #   switch ($os_image_type) {
-                #     'windows2019' { $OSTagPrefix = 'win19' }
-                #     'windows2022' { $OSTagPrefix = 'win22' }
-                #     'ubuntu2004' { $OSTagPrefix = 'ubuntu20' }
-                #     'ubuntu2204' { $OSTagPrefix = 'ubuntu22' }
-                #   }
-                #   Write-Output "OSTagPrefix = $OSTagPrefix"
+
+                $os_image_type = '${{ parameters.image_type }}'
+                Write-Output "os image type = $os_image_type"
+                switch ($os_image_type) {
+                  'windows2019' { $OSTagPrefix = 'win19' }
+                  'windows2022' { $OSTagPrefix = 'win22' }
+                  'ubuntu2004' { $OSTagPrefix = 'ubuntu20' }
+                  'ubuntu2204' { $OSTagPrefix = 'ubuntu22' }
+                }
+                Write-Output "OSTagPrefix = $OSTagPrefix"
+                Write-Host "##vso[task.setvariable variable=OSTagPrefix;]$OSTagPrefix"
 
                 #   $IncludePrerelease = if ($runner_images_version -eq 'prerelease') { $true } else { $false }
                 #   Write-Output "IncludePrerelease = $IncludePrerelease"
@@ -127,6 +129,7 @@ stages:
                   Write-Host "##vso[task.setvariable variable=image_readme_name]Windows2022-Readme.md"
                   $image_template_name = "windows-2022.json"
                 }
+                Write-Host "##vso[task.setvariable variable=image_template_name]$image_template_name"
 
                 $TemplateFileName = $image_template_name
                 if ($TemplateFileName) {
@@ -176,7 +179,9 @@ stages:
                 -Location $(AZURE_LOCATION) `
                 -VirtualNetworkName $(BUILD_AGENT_VNET_NAME) `
                 -VirtualNetworkRG $(BUILD_AGENT_VNET_RESOURCE_GROUP) `
-                -VirtualNetworkSubnet $(BUILD_AGENT_SUBNET_NAME)
+                -VirtualNetworkSubnet $(BUILD_AGENT_SUBNET_NAME) `
+                -ImageOs "$(OSTagPrefix)" `
+                -BuildTemplateName "$(image_template_name)"
             env:
               PACKER_LOG: 1
               PACKER_LOG_PATH: $(Build.ArtifactStagingDirectory)/packer-log.txt
