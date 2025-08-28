@@ -131,15 +131,11 @@ stages:
                 }
                 Write-Host "##vso[task.setvariable variable=image_template_name]$image_template_name"
 
-                $TemplateFileName = $image_template_name
-                if ($TemplateFileName) {
-                  $TemplatePath = Join-Path $TemplateDirectoryPath $TemplateFileName
-                } else {
-                  $TemplatePath = Join-Path $TemplateDirectoryPath "$ImageType.pkr.hcl"
-                  if ( -not (Test-Path $TemplatePath) ) {
-                      $TemplatePath = Join-Path $TemplateDirectoryPath "$ImageType.json"
-                  }
-                }
+                $ImageType = "${{ parameters.image_type }}"
+                $TemplateDirectoryName = if ($ImageType.StartsWith("ubuntu")) { "ubuntu/templates" } else { "windows/templates" }
+                $TemplateDirectoryPath = Join-Path (Join-Path "runner-images" "images") $TemplateDirectoryName | Resolve-Path
+                $TemplatePath = Join-Path $TemplateDirectoryPath $($image_template_name)
+
                 Write-Host "##vso[task.setvariable variable=TemplateDirectoryPath;]$TemplateDirectoryPath"
                 Write-Host "##vso[task.setvariable variable=TemplatePath;]$TemplatePath"
 
@@ -170,7 +166,7 @@ stages:
               filePath: ./runner-images/images.CI/linux-and-win/build-image.ps1
               arguments: -ClientId $(CLIENT_ID) `
                 -ClientSecret $(CLIENT_SECRET) `
-                -TemplatePath $(TemplatePath) `
+                -TemplatePath $(TemplateDirectoryPath) `
                 -ImageName "$(ManagedImageName)" `
                 -ImageResourceGroupName $(AZURE_RESOURCE_GROUP) `
                 -TempResourceGroupName "$(TempResourceGroupName)" `
